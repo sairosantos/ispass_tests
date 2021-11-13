@@ -24,10 +24,10 @@ if [ ! -d $OUT_HOME ]; then
         mkdir -p $OUT_HOME
 fi
 
-for i in *.cpp
+for i in memcpy_*.cpp
 do 
-    rm exec/${i%.c}.out
-    g++ $i $COMP_FLAGS -o exec/${i%.c}.out
+    rm exec/${i%.cpp}.out
+    g++ $i $COMP_FLAGS -o exec/${i%.cpp}.out
     for j in "${SIZES[@]}";
 	do
     		echo "$PIN_HOME -t $SINUCA_TRACER_HOME -trace x86 -orcs_tracing 1 -output $TRACE_HOME/${i%.cpp}.${j}MB.1t -- $EXEC_HOME/${i%.cpp}.out ${j} ${l} &> $OUT_HOME/${i%.cpp}.${j}MB.out &"

@@ -291,10 +291,9 @@ int main (__v32s argc, char const *argv[]){
     ORCS_tracing_start();
 
     bloom_set (VIMA_VECTOR_SIZE, o_orderkey, (uint32_t) v_size/4, bloom_filter, bloom_filter_size, hash_function_factors, shift_amounts, hash_functions);
-    
-    ORCS_tracing_stop();
-
     bloom_chk (VIMA_VECTOR_SIZE, l_orderkey, v_size, bloom_filter, bloom_filter_size, hash_function_factors, shift_amounts, hash_functions, output, &output_count);
+
+    ORCS_tracing_stop();
     std::cout << output_count << " positives.\n";
 
     free (o_orderkey);
