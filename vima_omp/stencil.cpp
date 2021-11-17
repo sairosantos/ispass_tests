@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <omp.h>
 #include "../../intrinsics/vima/vima.hpp"
@@ -13,84 +14,68 @@ void __attribute__ ((noinline)) ORCS_tracing_stop() {
 }
 
 int main(__v32s argc, char const *argv[]) {
-    __v32s size = atoi(argv[1]);
-    __v32s VECTOR_SIZE = atoi (argv[2]);
-
+    __v32u size = atoi(argv[1]);
     if (size != 0 && (size & (size - 1)) == 0){
-        int i = 0;
+        __v32u i;
         __v32u v_size = (1024 * 1024 * size) / sizeof(__v32f);
-        __v32f *vector_a = (__v32f *) aligned_alloc(256, sizeof(__v32f) * v_size);
-        __v32f *vector_b = (__v32f *) aligned_alloc(256, sizeof(__v32f) * v_size);
+        __v32f *vector_a = (__v32f *)malloc(sizeof(__v32f) * v_size);
+        __v32f *vector_b = (__v32f *)malloc(sizeof(__v32f) * v_size);
         __v32f *mul = (__v32f *)malloc(sizeof(__v32f) * v_size);
-        if (VECTOR_SIZE == 2048){
-            #pragma omp parallel for
-            for (i = 0; i < v_size; i += VECTOR_SIZE) {
-                _vim2K_fmovs(1, &vector_a[i]);
-                _vim2K_fmovs(0, &vector_b[i]);
-                _vim2K_fmovs(1, &mul[i]);
-            }
+        for (i = 0; i < v_size; i += 64) {
+            _vim64_fmovs(1, &vector_a[i]);
+            _vim64_fmovs(0, &vector_b[i]);
+            _vim64_fmovs(1, &mul[i]);
         }
-        if (VECTOR_SIZE == 64){
-            #pragma omp parallel for
-            for (i = 0; i < v_size; i += VECTOR_SIZE) {
-                _vim64_fmovs(1, &vector_a[i]);
-                _vim64_fmovs(0, &vector_b[i]);
-                _vim64_fmovs(1, &mul[i]);
-            }
-        }
-        srand (time(NULL));
-        for (int x = 0; x < v_size; x++){
-            vector_a[x] = 1;//rand() % 10 + 1;
-            vector_b[x] = 0;//rand() % 10 + 1;
-            mul[x] = 2;
-        }
+        
         int elem = sqrt (v_size);
         int remainder = 0;
-        if (VECTOR_SIZE == 2048){
-            ORCS_tracing_start();
-            #pragma omp parallel for
-            for (int i = elem; i < v_size - elem - VECTOR_SIZE; i += VECTOR_SIZE) {
-                _vim2K_fadds(&vector_b[i], &vector_a[i-elem], &vector_b[i]);
-                _vim2K_fadds(&vector_b[i], &vector_a[i], &vector_b[i]);
-                _vim2K_fadds(&vector_b[i], &vector_a[i-1], &vector_b[i]);
-                _vim2K_fadds(&vector_b[i], &vector_a[i+1], &vector_b[i]);
-                _vim2K_fadds(&vector_b[i], &vector_a[i+elem], &vector_b[i]);
-                _vim2K_fmuls(&vector_b[i], &mul[i], &vector_b[i]);
-                remainder = i;
-            }
-            ORCS_tracing_stop();
-        }
+        for (int i = 0; i+elem+64 < v_size; i+=64) remainder = i;
 
-        if (VECTOR_SIZE == 64){
-            ORCS_tracing_start();
-            #pragma omp parallel for
-            for (int i = elem; i < v_size - elem - VECTOR_SIZE; i += VECTOR_SIZE) {
+        int tid, start, finish;
+        ORCS_tracing_start();
+        #pragma omp parallel shared (vector_a, vector_b, remainder) private (i)
+        {
+            int chunk_size = v_size / omp_get_num_threads();
+            tid = omp_get_thread_num();
+            start = tid*chunk_size;
+            finish = start + chunk_size;
+
+            start = start + tid * 64;
+            finish = finish + (tid+1) * 64;
+            if (finish > v_size) finish = v_size;
+            printf ("v_size: %d | %d of %d threads, %d to %d\n", v_size, tid, omp_get_num_threads(), start, finish);
+            for (i = start; i < finish; i += 64) {
                 _vim64_fadds(&vector_b[i], &vector_a[i-elem], &vector_b[i]);
                 _vim64_fadds(&vector_b[i], &vector_a[i], &vector_b[i]);
                 _vim64_fadds(&vector_b[i], &vector_a[i-1], &vector_b[i]);
                 _vim64_fadds(&vector_b[i], &vector_a[i+1], &vector_b[i]);
                 _vim64_fadds(&vector_b[i], &vector_a[i+elem], &vector_b[i]);
                 _vim64_fmuls(&vector_b[i], &mul[i], &vector_b[i]);
-                remainder = i;
             }
-            ORCS_tracing_stop();
+        
+            #pragma omp for schedule (static)
+            for (int i = 0; i < elem; i++){
+                if (i-elem > 0) vector_b[i] += vector_a[i-elem];
+                if (i-1 > 0) vector_b[i] += vector_a[i-1];
+                vector_b[i] += vector_a[i];
+                vector_b[i] += vector_a[i+1];
+                vector_b[i] += vector_a[i+elem];
+                vector_b[i] *= mul[i];
+            }
+
+            #pragma omp for schedule (static)
+            for (int i = remainder+elem+64; i< v_size; i++){
+                vector_b[i] += vector_a[i-elem];
+                vector_b[i] += vector_a[i-1];
+                vector_b[i] += vector_a[i];
+                if (i+1 < v_size) vector_b[i] += vector_a[i+1];
+                if (i+elem < v_size) vector_b[i] += vector_a[i+elem];
+                vector_b[i] *= mul[i];
+            }
         }
-        printf ("elem: %d\n", elem);
-        for (int x = 0; x < v_size; x++){
-            if (x % elem == 0) printf ("\n");
-            printf ("%.0lf ", vector_a[x]);
-        }
-        printf ("\n-------------------------\n");
-        for (int x = 0; x < v_size; x++){
-            if (x % elem == 0) printf ("\n");
-            printf ("%.0lf ", vector_b[x]);
-        }
+        ORCS_tracing_stop();
 
         printf ("%f\n", vector_b[v_size-1]);
-
-        free (vector_a);
-        free (vector_b);
-        free (mul);
     } else {
         printf("Error! Size is not power of two!\n");
         exit(1);

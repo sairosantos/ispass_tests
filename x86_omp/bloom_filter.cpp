@@ -164,15 +164,26 @@ int main (__v32s argc, char const *argv[]){
     ORCS_tracing_start();
 
     int i, tid, start, finish;
-
-    #pragma omp parallel for
-    for (int i = 0; i < v_size/4; i += VECTOR_SIZE) {
-        bloom_set_step (&o_orderkey[i], (int) v_size/4, bloom_filter, bloom_filter_size, hash_function_factors, shift_amounts, hash_functions);
+    #pragma omp parallel shared (o_orderkey, bloom_filter) private (i, tid, start, finish)
+    {
+        int chunk_size = (v_size/4) / omp_get_num_threads();
+        tid = omp_get_thread_num();
+        start = tid*chunk_size;
+        finish = start + chunk_size;
+        for (int i = start; i < finish; i += VECTOR_SIZE) {
+            bloom_set_step (&o_orderkey[i], (int) v_size/4, bloom_filter, bloom_filter_size, hash_function_factors, shift_amounts, hash_functions);
+        }
     }
 
-    #pragma omp parallel for
-    for (int i = 0; i < v_size; i += VECTOR_SIZE) {
-        bloom_chk_step (&l_orderkey[i], v_size, hash_functions, hash_function_factors, shift_amounts, bloom_filter, bloom_filter_size, output, &output_count);
+    #pragma omp parallel shared (l_orderkey, bloom_filter, output, output_count) private (i, tid, start, finish)
+    {
+        int chunk_size = v_size / omp_get_num_threads();
+        tid = omp_get_thread_num();
+        start = tid*chunk_size;
+        finish = start + chunk_size;
+        for (int i = start; i < finish; i += VECTOR_SIZE) {
+            bloom_chk_step (&l_orderkey[i], v_size, hash_functions, hash_function_factors, shift_amounts, bloom_filter, bloom_filter_size, output, &output_count);
+        }
     }
     
     printf ("output_count = %lu\n", output_count);

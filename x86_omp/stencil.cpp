@@ -4,6 +4,14 @@
 #include <immintrin.h>
 #include <omp.h>
 
+void __attribute__ ((noinline)) ORCS_tracing_start() {
+    asm volatile ("nop");
+}
+
+void __attribute__ ((noinline)) ORCS_tracing_stop() {
+    asm volatile ("nop");
+}
+
 int main(int argc, char const *argv[]) {
     int size = atoi(argv[1]);
     int v_size = (1024 * 1024 * size) / sizeof(float);
@@ -23,10 +31,15 @@ int main(int argc, char const *argv[]) {
 
     __m512 elem_a1, elem_a2, elem_a3, elem_a4, elem_a5, elem_b;
     __m512 mul = {2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0};
+    int i, tid, start, finish;
+    ORCS_tracing_start();
     #pragma omp parallel shared (data_a, data_b, remainder) private (i, elem_a1, elem_a2, elem_a3, elem_a4, elem_a5, elem_b)
     {
-	#pragma omp for schedule (static)
-    	for (i = elem; i < remainder; i += 16) {
+	    int chunk_size = v_size / omp_get_num_threads();
+        tid = omp_get_thread_num();
+        start = tid*chunk_size;
+        finish = start + chunk_size;
+    	for (i = start; i < finish; i += 16) {
             elem_a1 = _mm512_load_ps (&data_a[i-elem]);
             elem_a2 = _mm512_loadu_ps (&data_a[i-1]);
             elem_a3 = _mm512_load_ps (&data_a[i]);
@@ -70,7 +83,7 @@ int main(int argc, char const *argv[]) {
             _mm512_stream_ps (&data_b[i], elem_b);
         }
     }
-
+    ORCS_tracing_stop();
     printf ("%f\n", data_b[v_size-1]);
     
     return 0;

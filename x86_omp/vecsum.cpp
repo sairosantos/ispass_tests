@@ -4,6 +4,14 @@
 #include <immintrin.h>
 #include <omp.h>
 
+void __attribute__ ((noinline)) ORCS_tracing_start() {
+    asm volatile ("nop");
+}
+
+void __attribute__ ((noinline)) ORCS_tracing_stop() {
+    asm volatile ("nop");
+}
+
 int main(int argc, char const *argv[]) {
     int v_size;
     int size = atoi(argv[1]);
@@ -17,13 +25,23 @@ int main(int argc, char const *argv[]) {
     
     int i, tid, start, finish;
     
-    #pragma omp parallel for
-    for (i = start; i < finish; i += 16) {
-        vec_a = _mm512_load_ps (&data_a[i]);
-        vec_b = _mm512_load_ps (&data_b[i]);
-        vec_c = _mm512_add_ps(vec_a, vec_b);
-        _mm512_store_ps (&data_c[i], vec_c);
+    ORCS_tracing_start();
+    
+    #pragma omp parallel shared (data_a, data_b, data_c) private (i, vec_a, vec_b, vec_c, tid, start, finish)
+    {
+        int chunk_size = v_size / omp_get_num_threads();
+        tid = omp_get_thread_num();
+        start = tid*chunk_size;
+        finish = start + chunk_size;
+        for (i = start; i < finish; i += 16) {
+            vec_a = _mm512_load_ps (&data_a[i]);
+            vec_b = _mm512_load_ps (&data_b[i]);
+            vec_c = _mm512_add_ps(vec_a, vec_b);
+            _mm512_store_ps (&data_c[i], vec_c);
+        }
     }
+
+    ORCS_tracing_stop();
 
     printf ("%f\n", data_c[v_size-1]);
     return 0;

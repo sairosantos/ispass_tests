@@ -3,7 +3,7 @@ HOME="/home/srsantos/Experiment"
 SIM_HOME=$HOME"/OrCS"
 CODE_HOME=$HOME"/ispass_tests/x86_omp"
 TRACE_HOME=$HOME"/ispass_tests/x86_omp/traces"
-THREADS_N=(2 4 8 16 32)
+THREADS_N=(2) #4 8 16 32)
 DATE_TIME=$(date '+%d%m%Y_%H%M%S');
 
 cd $CODE_HOME
