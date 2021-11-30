@@ -27,7 +27,7 @@ fi
 
 for THREADS in "${THREADS_N[@]}";
 do
-	for i in *.cpp
+	for i in bloom*.cpp
 	do 
     	rm exec/${i%.cpp}.out
     	g++ $i $COMP_FLAGS -o exec/${i%.cpp}.out
@@ -36,7 +36,7 @@ do
     	for j in "${SIZES[@]}";
 		do
 			echo "$PIN_HOME -t $SINUCA_TRACER_HOME -trace x86 -output $TRACE_HOME/${i%.cpp}.${j}MB.${THREADS}t -threads ${THREADS} -- $EXEC_HOME/${i%.cpp}.out ${j} &> $OUT_HOME/${i%.cpp}.${j}MB.out"
-			nohup $PIN_HOME -t $SINUCA_TRACER_HOME -trace x86 -output $TRACE_HOME/${i%.cpp}.${j}MB.${THREADS}t -threads ${THREADS} -- $EXEC_HOME/${i%.cpp}.out ${j} &> $OUT_HOME/${i%.cpp}.${j}MB.out
+			#nohup $PIN_HOME -t $SINUCA_TRACER_HOME -trace x86 -output $TRACE_HOME/${i%.cpp}.${j}MB.${THREADS}t -threads ${THREADS} -- $EXEC_HOME/${i%.cpp}.out ${j} &> $OUT_HOME/${i%.cpp}.${j}MB.out
 		done
 	done
 done

@@ -82,7 +82,7 @@ int* bloom_create (int n, float p, size_t *size, size_t *functions){
     return bf;
 }
 
-void bloom_set_step (int32_t* entries, int entries_size, int32_t* bloom_filter, size_t bloom_filter_size, int32_t* factors, int32_t* shift_m, size_t functions){
+void bloom_set_step (int32_t* entries, int entries_size, int32_t* bloom_filter, size_t bloom_filter_size, int32_t* factors, int32_t* shift_m, size_t functions, omp_lock_t* bf_locks){
 	__m512i mask_1 = _mm512_set1_epi32(1);
 	__m512i mask_31 = _mm512_set1_epi32(31);
 
@@ -108,7 +108,11 @@ void bloom_set_step (int32_t* entries, int entries_size, int32_t* bloom_filter, 
 
 		_mm512_storeu_si512 (aux_vec1, bit_mod);
 	    _mm512_storeu_si512 (aux_vec2, bit_div);
-		for (int i = 0; i < VECTOR_SIZE; i++) bloom_filter[aux_vec2[i]] = bloom_filter[aux_vec2[i]] | aux_vec1[i];
+		for (int i = 0; i < VECTOR_SIZE; i++) {
+            omp_set_lock (&bf_locks[aux_vec2[i]]);
+            bloom_filter[aux_vec2[i]] = bloom_filter[aux_vec2[i]] | aux_vec1[i];
+            omp_unset_lock (&bf_locks[aux_vec2[i]]);
+        }
 
 		fun = _mm512_add_epi32 (mask_1, fun);
 	}
@@ -147,6 +151,14 @@ int main (__v32s argc, char const *argv[]){
     size_t output_count = 0;
     
     int *bloom_filter = bloom_create ((int) v_size/4, p, &bloom_filter_size, &hash_functions);
+    omp_lock_t *bf_locks = (omp_lock_t*) malloc (bloom_filter_size * sizeof (omp_lock_t));
+
+    #pragma omp parallel for
+    for (int i = 0; i < bloom_filter_size; i ++) {
+        omp_init_lock (&bf_locks[i]);
+        bf_locks = 0;
+    }
+
     int *output = (int*) aligned_alloc (32, v_size * sizeof (int));
     for (int i = 0; i < v_size; i ++) output[i] = 0;
 
@@ -171,7 +183,7 @@ int main (__v32s argc, char const *argv[]){
         start = tid*chunk_size;
         finish = start + chunk_size;
         for (int i = start; i < finish; i += VECTOR_SIZE) {
-            bloom_set_step (&o_orderkey[i], (int) v_size/4, bloom_filter, bloom_filter_size, hash_function_factors, shift_amounts, hash_functions);
+            bloom_set_step (&o_orderkey[i], (int) v_size/4, bloom_filter, bloom_filter_size, hash_function_factors, shift_amounts, hash_functions, bf_locks);
         }
     }
 

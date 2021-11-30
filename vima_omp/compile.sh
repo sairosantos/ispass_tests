@@ -9,7 +9,7 @@ OUT_HOME=$CODE_HOME"/out"
 TRACE_HOME=$CODE_HOME"/traces"
 COMP_FLAGS="-O2 -DNOINLINE -mavx2 -march=native -fopenmp"
 SIZES=(1) #2 4 8 16 32 64)
-THREADS_N=(2) #4 8 16 32)
+THREADS_N=(16) #4 8 16 32)
 
 cd $CODE_HOME
 
