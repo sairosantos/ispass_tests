@@ -35,16 +35,8 @@ int main(__v32s argc, char const *argv[]) {
         ORCS_tracing_start();
         #pragma omp parallel shared (vector_a, vector_b, remainder) private (i)
         {
-            int chunk_size = v_size / omp_get_num_threads();
-            tid = omp_get_thread_num();
-            start = tid*chunk_size;
-            finish = start + chunk_size;
-
-            start = start + tid * 64;
-            finish = finish + (tid+1) * 64;
-            if (finish > v_size) finish = v_size;
-            printf ("v_size: %d | %d of %d threads, %d to %d\n", v_size, tid, omp_get_num_threads(), start, finish);
-            for (i = start; i < finish; i += 64) {
+            #pragma omp for schedule (static)
+            for (i = elem; i < v_size; i += 64) {
                 _vim64_fadds(&vector_b[i], &vector_a[i-elem], &vector_b[i]);
                 _vim64_fadds(&vector_b[i], &vector_a[i], &vector_b[i]);
                 _vim64_fadds(&vector_b[i], &vector_a[i-1], &vector_b[i]);

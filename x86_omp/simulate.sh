@@ -16,7 +16,7 @@ for THREADS in "${THREADS_N[@]}";
 do
 	cd $TRACE_HOME
 	CONFIG_FILE="configuration_files/skylake_${THREADS}cores.cfg"
-	for i in *.${THREADS}t.tid0.stat.out.gz
+	for i in stencil_*.${THREADS}t.tid0.stat.out.gz
 	do 
     	cd $SIM_HOME
     	TRACE=${i%.tid0.stat.out.gz}
