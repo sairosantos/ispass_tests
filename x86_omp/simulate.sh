@@ -3,7 +3,7 @@ HOME="/home/srsantos/Experiment"
 SIM_HOME=$HOME"/OrCS"
 CODE_HOME=$HOME"/ispass_tests/x86_omp"
 TRACE_HOME=$HOME"/ispass_tests/x86_omp/traces"
-THREADS_N=(2) #4 8 16 32)
+THREADS_N=(16)
 DATE_TIME=$(date '+%d%m%Y_%H%M%S');
 
 cd $CODE_HOME
@@ -16,7 +16,7 @@ for THREADS in "${THREADS_N[@]}";
 do
 	cd $TRACE_HOME
 	CONFIG_FILE="configuration_files/skylake_${THREADS}cores.cfg"
-	for i in stencil_*.${THREADS}t.tid0.stat.out.gz
+	for i in bloom_filter.64MB*.${THREADS}t.tid0.stat.out.gz
 	do 
     	cd $SIM_HOME
     	TRACE=${i%.tid0.stat.out.gz}

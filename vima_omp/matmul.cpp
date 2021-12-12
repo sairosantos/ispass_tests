@@ -30,19 +30,20 @@ __v32s main(__v32s argc, char const *argv[]) {
 
         #pragma omp parallel shared (matrix_a, matrix_b, matrix_c) private (partial_sum)
         {
-            int chunk_size = m_size / omp_get_num_threads();
-            tid = omp_get_thread_num();
-            start = tid*chunk_size;
-            finish = start + chunk_size;
+            //int chunk_size = m_size / omp_get_num_threads();
+            //tid = omp_get_thread_num();
+            //start = tid*chunk_size;
+            //finish = start + chunk_size;
 
-            start = start + tid * 64;
-            finish = finish + (tid+1) * 64;
-            if (finish > m_size) finish = m_size;
-            printf ("m_size: %d | %d of %d threads, %d to %d\n", m_size, tid, omp_get_num_threads(), start, finish);
-            #pragma omp for schedule (static)
-            for (__v32s i = start; i < finish; ++i) {
+            //start = start + tid * 64;
+            //finish = finish + (tid+1) * 64;
+            //if (finish > m_size) finish = m_size;
+            //printf ("m_size: %d | %d of %d threads, %d to %d\n", m_size, tid, omp_get_num_threads(), start, finish);
+            //#pragma omp for schedule (static)
+            for (__v32s i = 0; i < m_size; ++i) {
                 partial_sum = (__v32f *)malloc(sizeof(__v32f) * 64 * n_vectors);
                 for (__v32s j = 0; j < m_size; ++j) {
+		    #pragma omp for schedule (static)
                     for (__v32s k = 0; k < n_vectors; ++k) {
                         _vim64_fmuls(&matrix_a[(i * 64 * n_vectors) + (k * 64)], &matrix_b[(j * 64 * n_vectors) + (k * 64)], &aux_vec[k * 64]);
                     }

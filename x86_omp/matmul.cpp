@@ -26,18 +26,20 @@ int main(int argc, char const *argv[]) {
 
         int i, j, k;
         __m512 vec_a, vec_b, aux_vec;
-        int i, tid, start, finish;
+        int tid, start, finish;
 
         ORCS_tracing_start();
-        #pragma omp parallel shared (vec_a, vec_b) private (i, j, k, sum, aux_vec)
+        #pragma omp parallel shared (vec_a, vec_b) private (sum, aux_vec)
         {
-            int chunk_size = m_size / omp_get_num_threads();
-            tid = omp_get_thread_num();
-            start = tid*chunk_size;
-            finish = start + chunk_size;
-            for (i = start; i < finish; ++i) {
+            //int chunk_size = m_size / omp_get_num_threads();
+            //tid = omp_get_thread_num();
+            //start = tid*chunk_size;
+            //finish = start + chunk_size;
+	    //#pragma omp for schedule (static)
+            for (i = 0; i < m_size; ++i) {
                 for (j = 0; j < m_size; ++j) {
                     sum = 0;
+		    #pragma omp for schedule (static)
                     for (k = 0; k < n_vectors; ++k) {
                         vec_a = _mm512_load_ps (&matrix_a[(i * 16 * n_vectors) + (k * 16)]);
                         vec_b = _mm512_load_ps (&matrix_b[(j * 16 * n_vectors) + (k * 16)]);

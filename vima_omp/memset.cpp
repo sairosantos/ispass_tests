@@ -29,6 +29,7 @@ __v32s main(__v32s argc, char const *argv[]) {
             finish = finish + (tid+1) * 64;
             if (finish > v_size) finish = v_size;
             printf ("v_size: %d | %d of %d threads, %d to %d\n", v_size, tid, omp_get_num_threads(), start, finish);
+	    //#pragma omp for schedule (static)
             for (i = start; i < finish; i += 64) _vim64_imovs(1, &vector[i]);
         }
         ORCS_tracing_stop();

@@ -45,7 +45,7 @@ int main(int argc, char const *argv[]) {
         remainder = i;
     }
 
-    for (int i = 0; i < elem; i += 16){
+    /*for (int i = 0; i < elem; i += 16){
 	if (i-elem > 0) elem_a1 = _mm512_load_ps (&data_a[i-elem]);
         if (i-1 > 0) elem_a2 = _mm512_loadu_ps (&data_a[i-1]);
         elem_a3 = _mm512_load_ps (&data_a[i]);
@@ -71,7 +71,7 @@ int main(int argc, char const *argv[]) {
         elem_b = _mm512_add_ps(elem_b, elem_a5);
         elem_b = _mm512_mul_ps(elem_b, mul);
         _mm512_stream_ps (&data_b[i], elem_b);
-    }
+    }*/
     ORCS_tracing_stop();
 
     printf ("%f\n", data_b[v_size-1]);

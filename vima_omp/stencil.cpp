@@ -56,7 +56,7 @@ int main(__v32s argc, char const *argv[]) {
             }
 
             #pragma omp for schedule (static)
-            for (int i = remainder+elem+64; i< v_size; i++){
+            for (i = remainder+elem+64; i< v_size; i++){
                 vector_b[i] += vector_a[i-elem];
                 vector_b[i] += vector_a[i-1];
                 vector_b[i] += vector_a[i];
