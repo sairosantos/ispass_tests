@@ -24,7 +24,7 @@ if [ ! -d $OUT_HOME ]; then
         mkdir -p $OUT_HOME
 fi
 
-for i in stencil*.cpp
+for i in mem*.cpp
 do 
     rm exec/${i%.cpp}.out
     g++ $i $COMP_FLAGS -o exec/${i%.cpp}.out

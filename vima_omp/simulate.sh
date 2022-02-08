@@ -3,7 +3,7 @@ HOME="/home/srsantos/Experiment"
 SIM_HOME=$HOME"/OrCS"
 CODE_HOME=$HOME"/ispass_tests/vima_omp"
 TRACE_HOME=$HOME"/ispass_tests/vima_omp/traces"
-KERNELS=(stencil)
+KERNELS=(memset)
 THREADS_N=(8) #4 8 16 32)
 DATE_TIME=$(date '+%d%m%Y_%H%M%S');
 CACHE_SIZE=(64)
@@ -34,7 +34,7 @@ do
     			done
 
     			echo "nohup ${COMMAND} -c ${CONFIG_FILE} &> ${CODE_HOME}/resultados3/${TRACE}_${k}_${DATE_TIME}.txt"
-        		#nohup ${COMMAND} -c ${CONFIG_FILE} &> ${CODE_HOME}/resultados3/${TRACE}_${k}_${DATE_TIME}.txt &
+        		nohup ${COMMAND} -c ${CONFIG_FILE} &> ${CODE_HOME}/resultados3/${TRACE}_${k}_${DATE_TIME}.txt &
 			done
 		done
 	done

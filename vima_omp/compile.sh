@@ -8,8 +8,8 @@ EXEC_HOME=$CODE_HOME"/exec"
 OUT_HOME=$CODE_HOME"/out"
 TRACE_HOME=$CODE_HOME"/traces"
 COMP_FLAGS="-O2 -DNOINLINE -mavx2 -march=native -fopenmp"
-SIZES=(2 4 8) #2 4 8 16 32 64)
-THREADS_N=(2 4 8 16) #4 8 16 32)
+SIZES=(1) #2 4 8 16 32 64)
+THREADS_N=(8) #4 8 16 32)
 
 cd $CODE_HOME
 
@@ -27,7 +27,7 @@ fi
 
 for THREADS in "${THREADS_N[@]}";
 do
-	for i in matmul*.cpp
+	for i in memset*.cpp
 	do 
     	rm exec/${i%.cpp}.out
     	g++ $i $COMP_FLAGS -o exec/${i%.cpp}.out
