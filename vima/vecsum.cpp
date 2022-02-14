@@ -24,6 +24,39 @@ __v32s main(__v32s argc, char const *argv[]) {
             }
             ORCS_tracing_stop();
         }
+
+        if (VECTOR_SIZE == 1024){
+            ORCS_tracing_start();
+            for (__v32s i = 0; i < v_size; i += VECTOR_SIZE) {
+                _vim1K_fadds(&vector_a[i], &vector_b[i], &vector_c[i]);
+            }
+            ORCS_tracing_stop();
+        }
+
+        if (VECTOR_SIZE == 512){
+            ORCS_tracing_start();
+            for (__v32s i = 0; i < v_size; i += VECTOR_SIZE) {
+                _vim512_fadds(&vector_a[i], &vector_b[i], &vector_c[i]);
+            }
+            ORCS_tracing_stop();
+        }
+
+        if (VECTOR_SIZE == 256){
+            ORCS_tracing_start();
+            for (__v32s i = 0; i < v_size; i += VECTOR_SIZE) {
+                _vim256_fadds(&vector_a[i], &vector_b[i], &vector_c[i]);
+            }
+            ORCS_tracing_stop();
+        }
+
+        if (VECTOR_SIZE == 128){
+            ORCS_tracing_start();
+            for (__v32s i = 0; i < v_size; i += VECTOR_SIZE) {
+                _vim128_fadds(&vector_a[i], &vector_b[i], &vector_c[i]);
+            }
+            ORCS_tracing_stop();
+        }
+
         if (VECTOR_SIZE == 64){
             ORCS_tracing_start();
             for (__v32s i = 0; i < v_size; i += VECTOR_SIZE) {

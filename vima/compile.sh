@@ -8,7 +8,7 @@ EXEC_HOME=$CODE_HOME"/exec"
 OUT_HOME=$CODE_HOME"/out"
 TRACE_HOME=$CODE_HOME"/traces"
 COMP_FLAGS="-O2 -DNOINLINE -static"
-VECTORS=(64) #2048) # 256 8192 1048576)
+VECTORS=(128 256 512 1024) #2048) # 256 8192 1048576)
 SIZES=(1) #2 4 8 16 32 64)
 
 cd $CODE_HOME
@@ -25,7 +25,7 @@ if [ ! -d $OUT_HOME ]; then
         mkdir -p $OUT_HOME
 fi
 
-for i in bloom_filter*.cpp
+for i in memcpy.cpp
 do 
     rm $EXEC_HOME/${i%.cpp}.out
     g++ $i $COMP_FLAGS -o $EXEC_HOME/${i%.cpp}.out

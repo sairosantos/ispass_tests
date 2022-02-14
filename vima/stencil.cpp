@@ -57,6 +57,62 @@ int main(__v32s argc, char const *argv[]) {
             ORCS_tracing_stop();
         }
 
+        if (VECTOR_SIZE == 1024){
+            ORCS_tracing_start();
+            for (int i = elem; i+elem+VECTOR_SIZE < v_size; i += VECTOR_SIZE) {
+                _vim1K_fadds(&vector_b[i], &vector_a[i-elem], &vector_b[i]);
+                _vim1K_fadds(&vector_b[i], &vector_a[i], &vector_b[i]);
+                _vim1K_fadds(&vector_b[i], &vector_a[i-1], &vector_b[i]);
+                _vim1K_fadds(&vector_b[i], &vector_a[i+1], &vector_b[i]);
+                _vim1K_fadds(&vector_b[i], &vector_a[i+elem], &vector_b[i]);
+                _vim1K_fmuls(&vector_b[i], &mul[i], &vector_b[i]);
+                remainder = i;
+            }
+            ORCS_tracing_stop();
+        }
+
+        if (VECTOR_SIZE == 512){
+            ORCS_tracing_start();
+            for (int i = elem; i+elem+VECTOR_SIZE < v_size; i += VECTOR_SIZE) {
+                _vim512_fadds(&vector_b[i], &vector_a[i-elem], &vector_b[i]);
+                _vim512_fadds(&vector_b[i], &vector_a[i], &vector_b[i]);
+                _vim512_fadds(&vector_b[i], &vector_a[i-1], &vector_b[i]);
+                _vim512_fadds(&vector_b[i], &vector_a[i+1], &vector_b[i]);
+                _vim512_fadds(&vector_b[i], &vector_a[i+elem], &vector_b[i]);
+                _vim512_fmuls(&vector_b[i], &mul[i], &vector_b[i]);
+                remainder = i;
+            }
+            ORCS_tracing_stop();
+        }
+
+        if (VECTOR_SIZE == 256){
+            ORCS_tracing_start();
+            for (int i = elem; i+elem+VECTOR_SIZE < v_size; i += VECTOR_SIZE) {
+                _vim256_fadds(&vector_b[i], &vector_a[i-elem], &vector_b[i]);
+                _vim256_fadds(&vector_b[i], &vector_a[i], &vector_b[i]);
+                _vim256_fadds(&vector_b[i], &vector_a[i-1], &vector_b[i]);
+                _vim256_fadds(&vector_b[i], &vector_a[i+1], &vector_b[i]);
+                _vim256_fadds(&vector_b[i], &vector_a[i+elem], &vector_b[i]);
+                _vim256_fmuls(&vector_b[i], &mul[i], &vector_b[i]);
+                remainder = i;
+            }
+            ORCS_tracing_stop();
+        }
+
+        if (VECTOR_SIZE == 128){
+            ORCS_tracing_start();
+            for (int i = elem; i+elem+VECTOR_SIZE < v_size; i += VECTOR_SIZE) {
+                _vim128_fadds(&vector_b[i], &vector_a[i-elem], &vector_b[i]);
+                _vim128_fadds(&vector_b[i], &vector_a[i], &vector_b[i]);
+                _vim128_fadds(&vector_b[i], &vector_a[i-1], &vector_b[i]);
+                _vim128_fadds(&vector_b[i], &vector_a[i+1], &vector_b[i]);
+                _vim128_fadds(&vector_b[i], &vector_a[i+elem], &vector_b[i]);
+                _vim128_fmuls(&vector_b[i], &mul[i], &vector_b[i]);
+                remainder = i;
+            }
+            ORCS_tracing_stop();
+        }
+
         if (VECTOR_SIZE == 64){
             ORCS_tracing_start();
             for (int i = elem; i+elem+VECTOR_SIZE < v_size; i += VECTOR_SIZE) {
