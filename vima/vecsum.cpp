@@ -14,9 +14,9 @@ __v32s main(__v32s argc, char const *argv[]) {
 
     if (size != 0 && (size & (size - 1)) == 0){
         __v32u v_size = (1024 * 1024 * size) / sizeof(__v32f);
-        __v32f *vector_a = (__v32f *) aligned_alloc (256, sizeof(__v32f) * v_size);
-        __v32f *vector_b = (__v32f *) aligned_alloc (256, sizeof(__v32f) * v_size);
-        __v32f *vector_c = (__v32f *) aligned_alloc (256, sizeof(__v32f) * v_size);
+        __v32f *vector_a = (__v32f *) aligned_alloc (32, 2048 + sizeof(__v32f) * v_size);
+        __v32f *vector_b = (__v32f *) aligned_alloc (32, 2048 + sizeof(__v32f) * v_size);
+        __v32f *vector_c = (__v32f *) aligned_alloc (32, 2048 + sizeof(__v32f) * v_size);
         if (VECTOR_SIZE == 2048){
             ORCS_tracing_start();
             for (__v32s i = 0; i < v_size; i += VECTOR_SIZE) {
