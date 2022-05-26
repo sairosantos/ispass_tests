@@ -8,8 +8,8 @@ EXEC_HOME=$CODE_HOME"/exec"
 OUT_HOME=$CODE_HOME"/out"
 TRACE_HOME=$CODE_HOME"/traces"
 COMP_FLAGS="-O2 -DNOINLINE -static"
-VECTORS=(2048) #2048) # 256 8192 1048576)
-SIZES=(1)
+VECTORS=(64 128 256) #2048) # 256 8192 1048576)
+SIZES=(8 16 32 64)
 
 cd $CODE_HOME
 
@@ -25,7 +25,7 @@ if [ ! -d $OUT_HOME ]; then
         mkdir -p $OUT_HOME
 fi
 
-for i in bloom*.cpp
+for i in *tion.cpp
 do 
     rm $EXEC_HOME/${i%.cpp}.out
     g++ $i $COMP_FLAGS -o $EXEC_HOME/${i%.cpp}.out
@@ -34,7 +34,7 @@ do
 		for l in "${VECTORS[@]}";
 		do
 			echo "$PIN_HOME -t $SINUCA_TRACER_HOME -trace iVIM -orcs_tracing 1 -output $TRACE_HOME/${i%.cpp}.${j}MB_${l}B.1t -- $EXEC_HOME/${i%.cpp}.out ${j} ${l} &> $OUT_HOME/${i%.cpp}.${j}MB_${l}B.out &"
-			#nohup $PIN_HOME -t $SINUCA_TRACER_HOME -trace iVIM -orcs_tracing 1 -output $TRACE_HOME/${i%.cpp}.${j}MB_${l}B.1t -- $EXEC_HOME/${i%.cpp}.out ${j} ${l} &> $OUT_HOME/${i%.cpp}.${j}MB_${l}B.out &
+			nohup $PIN_HOME -t $SINUCA_TRACER_HOME -trace iVIM -orcs_tracing 1 -output $TRACE_HOME/${i%.cpp}.${j}MB_${l}B.1t -- $EXEC_HOME/${i%.cpp}.out ${j} ${l} &> $OUT_HOME/${i%.cpp}.${j}MB_${l}B.out
 		done
     done
 done

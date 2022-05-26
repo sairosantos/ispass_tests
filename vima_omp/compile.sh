@@ -8,8 +8,9 @@ EXEC_HOME=$CODE_HOME"/exec"
 OUT_HOME=$CODE_HOME"/out"
 TRACE_HOME=$CODE_HOME"/traces"
 COMP_FLAGS="-O2 -DNOINLINE -mavx2 -march=native -fopenmp"
-SIZES=(1) #2 4 8 16 32 64)
-THREADS_N=(8) #4 8 16 32)
+SIZES=(8 16 32 64)
+VECTOR_SIZE=(128)
+THREADS_N=(2 4 8) #4 8 16 32)
 
 cd $CODE_HOME
 
@@ -27,16 +28,19 @@ fi
 
 for THREADS in "${THREADS_N[@]}";
 do
-	for i in memset*.cpp
-	do 
-    	rm exec/${i%.cpp}.out
-    	g++ $i $COMP_FLAGS -o exec/${i%.cpp}.out
-    	export OMP_NUM_THREADS=${THREADS}
-		export OMP_WAIT_POLICY=passive
-    	for j in "${SIZES[@]}";
-		do
-			echo "$PIN_HOME -t $SINUCA_TRACER_HOME -orcs_tracing 1 -trace iVIM -output $TRACE_HOME/${i%.cpp}.${j}MB.${THREADS}t -threads ${THREADS} -- $EXEC_HOME/${i%.cpp}.out ${j} &> $OUT_HOME/${i%.cpp}.${j}MB.out"
-			nohup $PIN_HOME -t $SINUCA_TRACER_HOME -orcs_tracing 1 -trace iVIM -output $TRACE_HOME/${i%.cpp}.${j}MB.${THREADS}t -threads ${THREADS} -- $EXEC_HOME/${i%.cpp}.out ${j} &> $OUT_HOME/${i%.cpp}.${j}MB.out
+	for SIZE in "${VECTOR_SIZE[@]}";
+	do
+		for i in *tion.cpp
+		do 
+			rm exec/${i%.cpp}.out
+			g++ $i $COMP_FLAGS -o exec/${i%.cpp}.out
+			export OMP_NUM_THREADS=${THREADS}
+			export OMP_WAIT_POLICY=passive
+			for j in "${SIZES[@]}";
+			do
+				echo "$PIN_HOME -t $SINUCA_TRACER_HOME -orcs_tracing 1 -trace iVIM -output $TRACE_HOME/${i%.cpp}_${SIZE}B.${j}MB.${THREADS}t -threads ${THREADS} -- $EXEC_HOME/${i%.cpp}.out ${j} ${SIZE} &> $OUT_HOME/${i%.cpp}.${j}MB_${SIZE}B.out"
+				nohup $PIN_HOME -t $SINUCA_TRACER_HOME -orcs_tracing 1 -trace iVIM -output $TRACE_HOME/${i%.cpp}_${SIZE}B.${j}MB.${THREADS}t -threads ${THREADS} -- $EXEC_HOME/${i%.cpp}.out ${j} ${SIZE} &> $OUT_HOME/${i%.cpp}.${j}MB_${SIZE}B.out
+			done
 		done
 	done
 done
